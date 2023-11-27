@@ -6,6 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy_ecs = "0.12.0"
+clap = "4.4.8"
+dotenvy = "0.15.7"
+nalgebra = "0.32.3"
+rumqttc = "0.23.0"
 
 # Git hooks
 [dev-dependencies.cargo-husky]

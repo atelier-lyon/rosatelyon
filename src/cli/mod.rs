@@ -25,8 +25,8 @@ pub struct Args {
     pub wheel_gaps: u16,
 
     /// The value Kp Ki Kd rho theta phi
-    #[clap(long, value_parser, num_args = 6, value_delimiter = ' ', env)]
-    pub pid_linear: Vec<u8>,
+    #[clap(long, env, value_parser, num_args = 6, value_delimiter = ' ')]
+    pub pid_linear: Vec<f32>,
 
     /// TODO: Add argument
     #[arg(long, env)]

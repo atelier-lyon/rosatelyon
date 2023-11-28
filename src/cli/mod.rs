@@ -36,9 +36,9 @@ pub struct Args {
     #[arg(long, env)]
     pub usb_descriptor: String,
 
-    /// The highest value of the encoder
+    /// The period of the encoder
     #[arg(long, env)]
-    pub encoder_high_value: u16,
+    pub encoder_period: u16,
 
     /// The resolution of the lidar
     #[arg(long, env)]

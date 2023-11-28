@@ -1,4 +1,3 @@
-
 pub mod cli;
 
 use bevy::prelude::*;
@@ -12,6 +11,6 @@ fn hello_world() {
 fn main() {
     dotenvy::dotenv().ok();
     let args = Args::parse();
-    println!("Hello {}!", args.mqtt_server);
+    println!("{:#?}", args);
     App::new().add_systems(Startup, hello_world).run();
 }

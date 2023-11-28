@@ -5,8 +5,8 @@ use clap::Parser;
 #[command(author, version, about, long_about = None)]
 pub struct Args {
     /// The url of the broker <mqtt://server:port>
-    #[arg(long, env)]
-    pub mqtt_server: String,
+    #[arg(long, env, value_parser, num_args= 1.., value_delimiter = ' ')]
+    pub mqtt_server: Vec<String>,
 
     /// The minimum limit of the speed
     #[arg(long, env)]
@@ -28,11 +28,19 @@ pub struct Args {
     #[clap(long, env, value_parser, num_args = 6, value_delimiter = ' ')]
     pub pid_linear: Vec<f32>,
 
-    /// TODO: Add argument
+    /// The frequency of the encoder
     #[arg(long, env)]
-    pub lidar_pose: u16,
+    pub encoder_frequency: u16,
 
-    /// TODO: Add argument
+    /// The usb device for the communicaton with the robot
+    #[arg(long, env)]
+    pub usb_descriptor: String,
+
+    /// The highest value of the encoder
+    #[arg(long, env)]
+    pub encoder_high_value: u16,
+
+    /// The resolution of the lidar
     #[arg(long, env)]
     pub lidar_resolution: u16,
 }

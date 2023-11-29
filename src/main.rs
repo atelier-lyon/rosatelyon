@@ -3,18 +3,17 @@ pub mod mqtt;
 
 use bevy::prelude::*;
 use clap::Parser;
-use cli::Args;
-
-use crate::mqtt::connect_client;
+use cli::{ressources::Args, system::print_arg};
 
 fn hello_world() {
-    println!("Hello World");
+    println!("Good to see you !");
 }
 
 fn main() {
     dotenvy::dotenv().ok();
-    let args = Args::parse();
-    println!("{:#?}", args);
-    connect_client(args.mqtt_server.get(0).unwrap());
-    App::new().add_systems(Startup, hello_world).run();
+    App::new()
+        .insert_resource(Args::parse())
+        .add_systems(Startup, hello_world)
+        .add_systems(Startup, print_arg)
+        .run();
 }

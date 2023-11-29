@@ -1,14 +1,19 @@
-use rumqttc::{Client, MqttOptions, QoS};
+use rumqttc::{Client, MqttOptions};
 use std::time::Duration;
 
-pub fn connect_client(broker: &String) {
-    let mut mqttoptions = MqttOptions::new("rumqtt-sync", broker.clone(), 1883);
+use crate::cli::ressources::Args;
+use bevy::prelude::*;
+
+pub fn connect_every_broker(args: Res<Args>) {
+    for broker in args.mqtt_server.iter() {
+        connect_client(broker);
+    }
+}
+
+fn connect_client(broker: &String) {
+    let mut mqttoptions = MqttOptions::new("Robot", broker, 1883);
     mqttoptions.set_keep_alive(Duration::from_secs(5));
 
-    let (mut client, _connection) = Client::new(mqttoptions, 10);
-    client.subscribe("hello/rumqtt", QoS::AtMostOnce).unwrap();
-    let payload = format!("publish {}", broker);
-    client
-        .publish("hello/rumqtt", QoS::AtLeastOnce, false, payload)
-        .unwrap();
+    let (mut _client, mut _connection) = Client::new(mqttoptions, 10);
+    println!("Connected to {}", broker);
 }

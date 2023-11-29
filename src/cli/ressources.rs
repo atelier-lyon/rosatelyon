@@ -8,6 +8,11 @@ pub struct Args {
     #[arg(long, env, value_parser, num_args= 1.., value_delimiter = ' ')]
     pub mqtt_server: Vec<String>,
 
+    /// The client name of the mqtt connection
+    /// (Same for every broker)
+    #[arg(long, env)]
+    pub mqtt_client_name: String,
+
     /// The main topic on the broker
     #[arg(long, env)]
     pub mqtt_main_topic: String,

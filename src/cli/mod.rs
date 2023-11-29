@@ -4,7 +4,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
-    /// The url of the broker <mqtt://server:port>
+    /// The url of the broker <server:port>
     #[arg(long, env, value_parser, num_args= 1.., value_delimiter = ' ')]
     pub mqtt_server: Vec<String>,
 

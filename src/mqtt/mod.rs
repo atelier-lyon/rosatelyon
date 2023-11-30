@@ -1,4 +1,4 @@
-use rumqttc::{Client, Connection, MqttOptions};
+use rumqttc::{Client, Connection, MqttOptions, QoS};
 use std::time::Duration;
 
 use crate::cli::ressources::Args;
@@ -23,12 +23,16 @@ pub fn connect_every_broker(mut commands: Commands, args: Res<Args>) {
 /// Format of the broker <server:port>
 ///
 /// Return: ClientConnection
-fn connect_client(client_name: String, broker: &String) -> ClientConnection {
-    // TODO: Extract the port from the broker string <server:port>
-    let mut mqttoptions = MqttOptions::new(client_name, broker, 1883);
-    mqttoptions.set_keep_alive(Duration::from_secs(5));
+fn connect_client(client_name: String, broker: &str) -> ClientConnection {
+    let args = broker.split(':').collect::<Vec<&str>>();
+    println!("Connecting to {} with {} port", args[0], args[1]);
+    let mut mqtt_options = MqttOptions::new(client_name, args[0], args[1].parse::<u16>().unwrap());
+    mqtt_options.set_keep_alive(Duration::from_secs(5));
 
-    let (client, connection) = Client::new(mqttoptions, 10);
-    println!("Connected to {}", broker);
+    let (mut client, connection) = Client::new(mqtt_options, 10);
+    client.subscribe("hello/world", QoS::AtLeastOnce).unwrap();
+    client
+        .publish("hello/world", QoS::AtLeastOnce, false, "test")
+        .unwrap();
     ClientConnection(client, connection)
 }

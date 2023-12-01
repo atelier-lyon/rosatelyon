@@ -1,12 +1,12 @@
+use std::{thread, time::Duration};
+
 use rumqttc::{Client, Connection, MqttOptions, QoS};
-use std::thread;
-use std::time::Duration;
 
 use crate::cli::ressources::Args;
 use bevy::prelude::*;
 
 #[derive(Component)]
-struct ClientConnection(Connection);
+pub struct ClientConnection(Client, Connection);
 
 // NOTE: Implement sync for the derive Component
 // Could be useful to find a better solution
@@ -16,7 +16,8 @@ unsafe impl Sync for ClientConnection {}
 /// Add a Component, ClientConnection for everty new connection
 pub fn connect_every_broker(mut commands: Commands, args: Res<Args>) {
     for broker in args.mqtt_server.iter() {
-        commands.spawn(connect_client(args.mqtt_client_name.clone(), broker));
+        let (client, connection) = connect_client(args.mqtt_client_name.clone(), broker);
+        commands.spawn(ClientConnection(client, connection));
     }
 }
 
@@ -24,22 +25,23 @@ pub fn connect_every_broker(mut commands: Commands, args: Res<Args>) {
 /// Format of the broker <server:port>
 ///
 /// Return: ClientConnection
-fn connect_client(client_name: String, broker: &str) -> ClientConnection {
+fn connect_client(client_name: String, broker: &str) -> (Client, Connection) {
     let args = broker.split(':').collect::<Vec<&str>>();
     println!("Connecting to {} with {} port", args[0], args[1]);
     let mqtt_options = MqttOptions::new(client_name, args[0], args[1].parse::<u16>().unwrap());
-    let (client, mut connection) = Client::new(mqtt_options, 10);
-    thread::spawn(move || publish(client));
-    for _ in connection.iter().enumerate() {}
-    ClientConnection(connection)
+    let (client, connection) = Client::new(mqtt_options, 10);
+    (client, connection)
 }
 
-fn publish(mut client: Client) {
-    client.subscribe("hello/world", QoS::AtMostOnce).unwrap();
-    let payload = "coucou";
-    let qos = QoS::AtLeastOnce;
+pub fn heartbeat(mut query: Query<&mut ClientConnection>) {
+    for mut item in query.iter_mut() {
+        println!("heartbeat !");
+        item.0.subscribe("hello/world", QoS::AtMostOnce).unwrap();
+        let payload = "coucou";
+        let qos = QoS::AtLeastOnce;
 
-    client.publish("hello/world", qos, true, payload).unwrap();
-
-    thread::sleep(Duration::from_secs(1));
+        item.0.publish("hello/world", qos, true, payload).unwrap();
+        thread::sleep(Duration::from_millis(100));
+        item.1.iter().next();
+    }
 }

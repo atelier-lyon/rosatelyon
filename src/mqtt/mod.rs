@@ -8,9 +8,23 @@ use std::time::Duration;
 #[derive(Component)]
 pub struct ClientConnection(Client, Connection);
 
+#[derive(Component)]
+pub struct LoggerRessources {
+    channel: Channel,
+    message: String,
+}
+
 // NOTE: Implement sync for the derive Component
 // Could be useful to find a better solution
 unsafe impl Sync for ClientConnection {}
+
+#[allow(dead_code)]
+enum Channel {
+    Main,
+    Camera,
+    Encoder,
+    Lidar,
+}
 
 /// Connect every the program to every broker
 /// Add a Component, ClientConnection for everty new connection
@@ -34,14 +48,36 @@ fn connect_client(client_name: String, broker: &str) -> (Client, Connection) {
     (client, connection)
 }
 
-pub fn heartbeat(mut query: Query<&mut ClientConnection>) {
-    for mut item in query.iter_mut() {
-        println!("heartbeat !");
-        let payload = "coucou";
-        let qos = QoS::AtLeastOnce;
-
-        item.0.publish("hello/world", qos, true, payload).unwrap();
-        thread::sleep(Duration::from_millis(100));
-        item.1.iter().next();
+fn get_channel(command: &Channel) -> String {
+    match command {
+        Channel::Main => "main".to_string(),
+        Channel::Camera => "camera".to_string(),
+        Channel::Encoder => "encoder".to_string(),
+        Channel::Lidar => "lidar".to_string(),
     }
+}
+
+pub fn send_mqtt_message(
+    mut query: Query<&mut ClientConnection>,
+    query_log: Query<&LoggerRessources>,
+) {
+    for mut item in query.iter_mut() {
+        for current_log in query_log.iter() {
+            let qos = QoS::AtLeastOnce;
+            let channel_name = format!("{}/{}", "hello", get_channel(&current_log.channel));
+            item.0
+                .publish(channel_name, qos, true, current_log.message.clone())
+                .unwrap();
+            thread::sleep(Duration::from_millis(100));
+            item.1.iter().next();
+        }
+    }
+}
+
+pub fn heartbeat(mut commands: Commands) {
+    let heart = LoggerRessources {
+        channel: Channel::Main,
+        message: "heartbeat !".to_string(),
+    };
+    commands.spawn(heart);
 }

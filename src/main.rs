@@ -22,6 +22,7 @@ fn main() {
         .add_systems(Startup, print_arg)
         .add_systems(Startup, connect_every_broker)
         .add_systems(Update, heartbeat)
+        .add_systems(Update, send_mqtt_message)
         .add_plugins(ScheduleRunnerPlugin::run_loop(Duration::from_secs_f64(
             1.0 / FREQUENCY,
         )))

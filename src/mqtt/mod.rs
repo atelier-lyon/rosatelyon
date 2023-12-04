@@ -1,9 +1,9 @@
-use std::{thread, time::Duration};
-
 use rumqttc::{Client, Connection, MqttOptions, QoS};
 
 use crate::cli::ressources::Args;
 use bevy::prelude::*;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Component)]
 pub struct ClientConnection(Client, Connection);
@@ -29,14 +29,14 @@ fn connect_client(client_name: String, broker: &str) -> (Client, Connection) {
     let args = broker.split(':').collect::<Vec<&str>>();
     println!("Connecting to {} with {} port", args[0], args[1]);
     let mqtt_options = MqttOptions::new(client_name, args[0], args[1].parse::<u16>().unwrap());
-    let (client, connection) = Client::new(mqtt_options, 10);
+    let (mut client, connection) = Client::new(mqtt_options, 10);
+    client.subscribe("hello/world", QoS::AtMostOnce).unwrap();
     (client, connection)
 }
 
 pub fn heartbeat(mut query: Query<&mut ClientConnection>) {
     for mut item in query.iter_mut() {
         println!("heartbeat !");
-        item.0.subscribe("hello/world", QoS::AtMostOnce).unwrap();
         let payload = "coucou";
         let qos = QoS::AtLeastOnce;
 

@@ -19,11 +19,22 @@ pub struct LoggerRessources {
 unsafe impl Sync for ClientConnection {}
 
 #[allow(dead_code)]
-enum Channel {
+pub enum Channel {
     Main,
     Camera,
     Encoder,
     Lidar,
+    Debug,
+}
+
+fn get_channel(command: &Channel) -> String {
+    match command {
+        Channel::Main => "main".to_string(),
+        Channel::Camera => "camera".to_string(),
+        Channel::Encoder => "encoder".to_string(),
+        Channel::Lidar => "lidar".to_string(),
+        Channel::Debug => "debug".to_string(),
+    }
 }
 
 /// Connect every the program to every broker
@@ -48,18 +59,15 @@ fn connect_client(client_name: String, broker: &str) -> (Client, Connection) {
     (client, connection)
 }
 
-fn get_channel(command: &Channel) -> String {
-    match command {
-        Channel::Main => "main".to_string(),
-        Channel::Camera => "camera".to_string(),
-        Channel::Encoder => "encoder".to_string(),
-        Channel::Lidar => "lidar".to_string(),
-    }
+/// Create a message on queue for mqtt
+pub fn log_message(mut commands: Commands, channel: Channel, message: String) {
+    commands.spawn(LoggerRessources { channel, message });
 }
 
 pub fn send_mqtt_message(
     mut query: Query<&mut ClientConnection>,
     query_log: Query<&LoggerRessources>,
+    // mut commands: Commands,
 ) {
     for mut item in query.iter_mut() {
         for current_log in query_log.iter() {
@@ -69,15 +77,8 @@ pub fn send_mqtt_message(
                 .publish(channel_name, qos, true, current_log.message.clone())
                 .unwrap();
             thread::sleep(Duration::from_millis(100));
+            // TODO: Despawn
             item.1.iter().next();
         }
     }
-}
-
-pub fn heartbeat(mut commands: Commands) {
-    let heart = LoggerRessources {
-        channel: Channel::Main,
-        message: "heartbeat !".to_string(),
-    };
-    commands.spawn(heart);
 }

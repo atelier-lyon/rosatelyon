@@ -9,9 +9,12 @@ use std::time::Duration;
 
 const FREQUENCY: f64 = 200.0;
 
-#[allow(dead_code)]
 fn hello_world() {
     println!("Good to see you !");
+}
+
+pub fn heartbeat(commands: Commands) {
+    log_message(commands, Channel::Debug, "heartbeat !".to_string());
 }
 
 fn main() {

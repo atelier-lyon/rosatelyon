@@ -15,6 +15,7 @@ pub struct LoggerRessources {
 }
 
 static mut QUEUE_MESSAGE: Vec<LoggerRessources> = Vec::new();
+
 // NOTE: Implement sync for the derive Component
 // Could be useful to find a better solution
 unsafe impl Sync for ClientConnection {}
@@ -80,7 +81,6 @@ pub fn send_mqtt_message(
                     .publish(channel_name, qos, true, current_log.message.clone())
                     .unwrap();
                 thread::sleep(Duration::from_millis(100));
-                // TODO: Despawn
                 item.1.iter().next();
             }
         }

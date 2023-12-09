@@ -15,6 +15,8 @@ fn hello_world() {
 
 pub fn heartbeat() {
     log_message(Channel::Debug, "heartbeat !".to_string());
+    log_message(Channel::Lidar, "heartbeat !".to_string());
+    log_message(Channel::Encoder, "heartbeat !".to_string());
 }
 
 fn main() {

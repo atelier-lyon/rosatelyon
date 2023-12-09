@@ -13,8 +13,8 @@ fn hello_world() {
     println!("Good to see you !");
 }
 
-pub fn heartbeat(commands: Commands) {
-    log_message(commands, Channel::Debug, "heartbeat !".to_string());
+pub fn heartbeat() {
+    log_message(Channel::Debug, "heartbeat !".to_string());
 }
 
 fn main() {

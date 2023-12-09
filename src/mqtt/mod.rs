@@ -14,6 +14,7 @@ pub struct LoggerRessources {
     message: String,
 }
 
+static mut QUEUE_MESSAGE: Vec<LoggerRessources> = Vec::new();
 // NOTE: Implement sync for the derive Component
 // Could be useful to find a better solution
 unsafe impl Sync for ClientConnection {}
@@ -60,25 +61,29 @@ fn connect_client(client_name: String, broker: &str) -> (Client, Connection) {
 }
 
 /// Create a message on queue for mqtt
-pub fn log_message(mut commands: Commands, channel: Channel, message: String) {
-    commands.spawn(LoggerRessources { channel, message });
+pub fn log_message(channel: Channel, message: String) {
+    unsafe {
+        QUEUE_MESSAGE.push(LoggerRessources { channel, message });
+    }
 }
 
 pub fn send_mqtt_message(
     mut query: Query<&mut ClientConnection>,
-    query_log: Query<&LoggerRessources>,
     // mut commands: Commands,
 ) {
-    for mut item in query.iter_mut() {
-        for current_log in query_log.iter() {
-            let qos = QoS::AtLeastOnce;
-            let channel_name = format!("{}/{}", "hello", get_channel(&current_log.channel));
-            item.0
-                .publish(channel_name, qos, true, current_log.message.clone())
-                .unwrap();
-            thread::sleep(Duration::from_millis(100));
-            // TODO: Despawn
-            item.1.iter().next();
+    unsafe {
+        for mut item in query.iter_mut() {
+            for current_log in QUEUE_MESSAGE.iter() {
+                let qos = QoS::AtLeastOnce;
+                let channel_name = format!("{}/{}", "hello", get_channel(&current_log.channel));
+                item.0
+                    .publish(channel_name, qos, true, current_log.message.clone())
+                    .unwrap();
+                thread::sleep(Duration::from_millis(100));
+                // TODO: Despawn
+                item.1.iter().next();
+            }
         }
+        QUEUE_MESSAGE.clear();
     }
 }

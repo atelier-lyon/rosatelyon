@@ -4,6 +4,12 @@
 ```sh
 cargo run
 ```
+# How to read the doc
+
+```sh
+cargo doc --no-deps --open
+```
+
 # Wanted Architecture
 ```mermaid
 flowchart RL
